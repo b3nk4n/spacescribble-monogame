@@ -1,5 +1,5 @@
 ﻿using System;
-using Microsoft.Devices;
+using Xamarin.Essentials;
 
 namespace SpaceScribble
 {
@@ -9,8 +9,16 @@ namespace SpaceScribble
 
         public static void Vibrate(float seconds)
         {
-            //if (settings.GetVabrationValue())
-            //    VibrateController.Default.Start(TimeSpan.FromSeconds(seconds));
+            if (!settings.GetVabrationValue())
+            {
+                return;
+            }
+
+            try
+            {
+                Vibration.Vibrate(TimeSpan.FromSeconds(seconds).TotalMilliseconds);
+            }
+            catch { /* Ignored */ }
         }
     }
 }
