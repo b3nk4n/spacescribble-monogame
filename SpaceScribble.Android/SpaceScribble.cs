@@ -267,8 +267,8 @@ public class SpaceScribble : Game, IBackButtonPressedCallback
                               playerManager);
 
         submissionManager = SubmissionManager.GetInstance();
-        SubmissionManager.FontBig = pericles20;
         SubmissionManager.FontSmall = pericles20;
+        SubmissionManager.FontBig = pericles32;
         SubmissionManager.Texture = menuSheet;
         SubmissionManager.GameInput = gameInput;
 

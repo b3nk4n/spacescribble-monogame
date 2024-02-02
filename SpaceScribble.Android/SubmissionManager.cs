@@ -119,9 +119,9 @@ namespace SpaceScribble
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Texture,
-                                 cancelDestination,
-                                 cancelSource,
-                                 Color.White * opacity);
+                             cancelDestination,
+                             cancelSource,
+                             Color.White * opacity);
 
             spriteBatch.Draw(Texture,
                                  retryDestination,
@@ -131,18 +131,18 @@ namespace SpaceScribble
             spriteBatch.DrawString(FontSmall,
                                    TEXT_SCORE,
                                    new Vector2(240 - FontSmall.MeasureString(TEXT_SCORE).X / 2,
-                                               430),
+                                               350),
                                    Color.Black * opacity);
 
             spriteBatch.DrawString(FontSmall,
                                    TEXT_LEVEL,
-                                   new Vector2(160,
-                                               510),
+                                   new Vector2(240 - FontSmall.MeasureString(TEXT_LEVEL).X / 2,
+                                               450),
                                    Color.Black * opacity);
 
             spriteBatch.DrawString(FontSmall,
                                    TEXT_CREDITS,
-                                   new Vector2(160,
+                                   new Vector2(240 - FontSmall.MeasureString(TEXT_LEVEL).X / 2,
                                                550),
                                    Color.Black * opacity);
 
@@ -151,23 +151,23 @@ namespace SpaceScribble
             spriteBatch.DrawString(FontBig,
                                   scoreString,
                                   new Vector2(240 - FontBig.MeasureString(scoreString).X / 2,
-                                              460),
+                                              375),
                                   Color.Black * opacity);
 
             String levelString = level.ToString();
 
             spriteBatch.DrawString(FontBig,
                                   levelString,
-                                  new Vector2(280,
-                                              510),
+                                  new Vector2(240 - FontBig.MeasureString(levelString).X / 2,
+                                              475),
                                   Color.Black * opacity);
 
-            String creditsString = credits.ToString();
+            String creditsString = String.Format("{0} $", credits.ToString());
 
             spriteBatch.DrawString(FontBig,
                                   creditsString,
-                                  new Vector2(280,
-                                              550),
+                                  new Vector2(240 - FontBig.MeasureString(creditsString).X / 2,
+                                              575),
                                   Color.Black * opacity);
 
             spriteBatch.Draw(Texture,
