@@ -17,14 +17,14 @@ namespace SpaceScribble.Android
     )]
     public class GameActivity : AndroidGameActivity
     {
-        private Game1 _game;
+        private SpaceScribble _game;
         private View _view;
 
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
 
-            _game = new Game1();
+            _game = new SpaceScribble();
             _view = _game.Services.GetService(typeof(View)) as View;
 
             SetContentView(_view);

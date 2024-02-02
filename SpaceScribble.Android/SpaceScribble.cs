@@ -4,12 +4,12 @@ using Microsoft.Xna.Framework.Input;
 
 namespace SpaceScribble.Android;
 
-public class Game1 : Game
+public class SpaceScribble : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    public Game1()
+    public SpaceScribble()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
