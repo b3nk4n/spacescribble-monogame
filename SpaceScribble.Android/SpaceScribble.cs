@@ -8,7 +8,7 @@ using SpaceScribble.Inputs;
 
 namespace SpaceScribble.Android;
 
-public class SpaceScribble : Game
+public class SpaceScribble : Game, IBackButtonPressedCallback
 {
     /*
      * The game's fixed width and heigth of the screen.
@@ -115,6 +115,8 @@ public class SpaceScribble : Game
     SpaceshipManager spaceshipAndPhonePositionManager;
 
     HandManager handManager;
+
+    private bool backButtonPressed = false;
 
     public SpaceScribble()
     {
@@ -363,8 +365,6 @@ public class SpaceScribble : Game
         handManager.Update(gameTime);
 
         gameInput.BeginUpdate();
-
-        bool backButtonPressed = false;
 
         backButtonTimer += elapsed;
 
@@ -1206,6 +1206,11 @@ public class SpaceScribble : Game
                    playerManager.SpecialShotReloadTime,
                    levelManager.CurrentLevel,
                    playerManager.Upgrades);
+    }
+
+    public void BackButtonPressed()
+    {
+        backButtonPressed = true;
     }
 }
 
