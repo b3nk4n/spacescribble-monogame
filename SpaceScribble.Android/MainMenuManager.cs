@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.IO;
 using SpaceScribble.Inputs;
+using Android.Content;
+using Android.App;
+using AndroidNet = Android.Net;
 
 namespace SpaceScribble
 {
@@ -42,18 +45,14 @@ namespace SpaceScribble
         private Rectangle settingsDestination = new Rectangle(120, 605,
                                                           240, 80);
 
-        private bool isReviewDisplayed = true;
         private Rectangle reviewSource = new Rectangle(240, 700,
                                                        100, 100);
+        private Rectangle reviewDestination = new Rectangle(370, 690,
+                                                            100, 100);
         private Rectangle moreGamesSource = new Rectangle(240, 500,
                                                        100, 100);
-        private Rectangle moreGamesOrReviewDestination = new Rectangle(15, 690,
-                                                            100, 100);
-
-        private Rectangle helpSource = new Rectangle(240, 400,
-                                                     100, 100);
-        private Rectangle helpDestination = new Rectangle(370, 690,
-                                                          100, 100);
+        private Rectangle moreGamesDestination = new Rectangle(15, 690,
+                                                               100, 100);
 
         private float opacity = 0.0f;
         private const float OpacityMax = 1.0f;
@@ -69,9 +68,8 @@ namespace SpaceScribble
         private const string InstructionsAction = "Instructions";
         private const string HighscoresAction = "Highscores";
         private const string SettingsAction = "Settings";
-        private const string MoreGamesOrReviewAction = "MoreGamesOrReview";
-
-        private Random rand = new Random();
+        private const string ReviewAction = "Review";
+        private const string MoreGamesAction = "MoreGames";
 
         #endregion
 
@@ -81,8 +79,6 @@ namespace SpaceScribble
         {
             this.texture = spriteSheet;
             this.gameInput = input;
-
-            isReviewDisplayed = rand.Next(2) == 0;
         }
 
         #endregion
@@ -103,9 +99,12 @@ namespace SpaceScribble
             gameInput.AddTouchGestureInput(SettingsAction,
                                            GestureType.Tap,
                                            settingsDestination);
-            gameInput.AddTouchGestureInput(MoreGamesOrReviewAction,
+            gameInput.AddTouchGestureInput(MoreGamesAction,
                                            GestureType.Tap,
-                                           moreGamesOrReviewDestination);
+                                           moreGamesDestination);
+            gameInput.AddTouchGestureInput(ReviewAction,
+                                           GestureType.Tap,
+                                           reviewDestination);
         }
 
         public void Update(GameTime gameTime)
@@ -144,29 +143,18 @@ namespace SpaceScribble
                                 Color.White * opacity);
 
             spriteBatch.Draw(texture,
-                             helpDestination,
-                             helpSource,
-                             Color.White * opacity);
-
-            spriteBatch.Draw(texture,
                              settingsDestination,
                              settingsSource,
                              Color.White * opacity);
 
-            if (isReviewDisplayed)
-            {
-                spriteBatch.Draw(texture,
-                             moreGamesOrReviewDestination,
-                             reviewSource,
-                             Color.White * opacity);
-            }
-            else
-            {
-                spriteBatch.Draw(texture,
-                             moreGamesOrReviewDestination,
+            spriteBatch.Draw(texture,
+                             moreGamesDestination,
                              moreGamesSource,
                              Color.White * opacity);
-            }
+            spriteBatch.Draw(texture,
+                             reviewDestination,
+                             reviewSource,
+                             Color.White * opacity);
         }
 
         private void handleTouchInputs()
@@ -191,23 +179,32 @@ namespace SpaceScribble
                 this.lastPressedMenuItem = MenuItems.Settings;
                 SoundManager.PlayPaperSound();
             }
-            else if (gameInput.IsPressed(MoreGamesOrReviewAction))
+            else if (gameInput.IsPressed(MoreGamesAction))
             {
-                if (isReviewDisplayed)
-                {
-                    // TODO implement
-                }
-                else
-                {
-                    // TODO implement
-                }
-                SoundManager.PlayPaperSound();
+                var devStoreUri = "https://play.google.com/store/apps/dev?id=4634207615548190812";
+                launchInBrowser(devStoreUri);
 
+                SoundManager.PlayPaperSound();
+            }
+            else if (gameInput.IsPressed(ReviewAction))
+            {
+                var packageName = Application.Context.PackageName;
+                var appInStoreUri = "https://play.google.com/store/apps/details?id=" + packageName;
+                launchInBrowser(appInStoreUri);
+
+                SoundManager.PlayPaperSound();
             }
             else
             {
                 this.lastPressedMenuItem = MenuItems.None;
             }
+        }
+
+        private void launchInBrowser(string uri)
+        {
+            var intent = new Intent(Intent.ActionView, AndroidNet.Uri.Parse(uri))
+                .AddFlags(ActivityFlags.NewTask);
+            Application.Context.StartActivity(intent);
         }
 
         #endregion
@@ -220,7 +217,6 @@ namespace SpaceScribble
             this.opacity = Single.Parse(reader.ReadLine());
             this.isActive = Boolean.Parse(reader.ReadLine());
             this.time = Single.Parse(reader.ReadLine());
-            this.isReviewDisplayed = Boolean.Parse(reader.ReadLine());
         }
 
         public void Deactivated(StreamWriter writer)
@@ -229,7 +225,6 @@ namespace SpaceScribble
             writer.WriteLine(opacity);
             writer.WriteLine(isActive);
             writer.WriteLine(time);
-            writer.WriteLine(isReviewDisplayed);
         }
 
         #endregion
