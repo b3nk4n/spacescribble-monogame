@@ -30,40 +30,43 @@ namespace SpaceScribble
 
         private const string MUSIC_TITLE = "Music: ";
         private SoundValues musicValue = SoundValues.Low;
-        private readonly int musicPositionY = 260;
-        private readonly Rectangle musicDestination = new Rectangle(90, 245,
+        private readonly int musicPositionY = 250;
+        private readonly Rectangle musicDestination = new Rectangle(90, 235,
                                                                     300, 50);
 
         private const string SFX_TITLE = "SFX: ";
         private SoundValues sfxValue = SoundValues.High;
-        private readonly int sfxPositionY = 340;
-        private readonly Rectangle sfxDestination = new Rectangle(90, 325,
+        private readonly int sfxPositionY = 310;
+        private readonly Rectangle sfxDestination = new Rectangle(90, 295,
                                                                   300, 50);
 
         private const string VIBRATION_TITLE = "Vibration: ";
         private ToggleValues vibrationValue = ToggleValues.On;
-        private readonly int vibrationPositionY = 420;
-        private readonly Rectangle vibrationDestination = new Rectangle(90, 405,
+        private readonly int vibrationPositionY = 370;
+        private readonly Rectangle vibrationDestination = new Rectangle(90, 355,
                                                                         300, 50);
 
         private NeutralPositionValues neutralPositionValue = NeutralPositionValues.Angle20;
 
         private const string SENSOR_SETTINGS_TITLE = "Sensor control settings: ";
-        private readonly int sensorTitlePositionY = 525;
+        private readonly int sensorTitlePositionY = 515;
 
         private const string AUTOFIRE_TITLE = "Autofire: ";
         private ToggleValues autofireValue = ToggleValues.On;
-        private readonly int autoforePositionY = 600;
-        private readonly Rectangle autofireDestination = new Rectangle(90, 585,
+        private readonly int autoforePositionY = 580;
+        private readonly Rectangle autofireDestination = new Rectangle(90, 565,
                                                                        300, 50);
 
         private const string CONTROL_POSITION_TITLE = "Control Position: ";
         private ControlPositionValues controlPositionValue = ControlPositionValues.Right;
-        private readonly int controlPositionY = 680;
-        private readonly Rectangle controlPositionDestination = new Rectangle(90, 665,
+        private readonly int controlPositionY = 640;
+        private readonly Rectangle controlPositionDestination = new Rectangle(90, 625,
                                                                               300, 50);
 
-        private static Rectangle screenBounds;
+        private readonly Rectangle cancelSource = new Rectangle(0, 800,
+                                                                240, 80);
+        private readonly Rectangle cancelDestination = new Rectangle(125, 710,
+                                                                     230, 77);
 
         private float opacity = 0.0f;
         private const float OpacityMax = 1.0f;
@@ -76,9 +79,9 @@ namespace SpaceScribble
         private const string MusicAction = "MusicSetting";
         private const string SfxAction = "SFXSetting";
         private const string VibrationAction = "VibrationSetting";
-        private const string NeutralPositionAction = "NeutralPosSetting";
         private const string ControlPositionAction = "ControlPosSetting";
         private const string AutofireAction = "AutofireSetting";
+        private const string CancelAction = "Cancel";
 
         private const string ON = "ON";
         private const string OFF = "OFF";
@@ -94,6 +97,7 @@ namespace SpaceScribble
         private const int ValuePositionX = 400;
 
         private bool isInvalidated = false;
+        private bool cancelClicked = false;
 
         #endregion
 
@@ -125,13 +129,15 @@ namespace SpaceScribble
             GameInput.AddTouchGestureInput(AutofireAction,
                                            GestureType.Tap,
                                            autofireDestination);
+            GameInput.AddTouchGestureInput(CancelAction,
+                                        GestureType.Tap,
+                                        cancelDestination);
         }
 
-        public void Initialize(Texture2D tex, SpriteFont f, Rectangle screen)
+        public void Initialize(Texture2D tex, SpriteFont f)
         {
             texture = tex;
             font = f;
-            screenBounds = screen;
         }
 
         public static SettingsManager GetInstance()
@@ -175,39 +181,43 @@ namespace SpaceScribble
 
             drawControlPosition(spriteBatch);
             drawAutofire(spriteBatch);
+
+            spriteBatch.Draw(texture,
+                             cancelDestination,
+                             cancelSource,
+                             Color.White * opacity);
         }
 
         private void handleTouchInputs()
         {
-            // Vibration
             if (GameInput.IsPressed(VibrationAction))
             {
                 toggleVibration();
                 SoundManager.PlayPaperSound();
             }
-            // Music
             else if (GameInput.IsPressed(MusicAction))
             {
                 toggleMusic();
                 SoundManager.PlayPaperSound();
             }
-            // Sfx
             else if (GameInput.IsPressed(SfxAction))
             {
                 toggleSfx();
                 SoundManager.PlayPaperSound();
             }
-            // ControlPosition
             else if (GameInput.IsPressed(ControlPositionAction))
             {
                 toggleControlPosition();
                 SoundManager.PlayPaperSound();
             }
-            // Autofire
             else if (GameInput.IsPressed(AutofireAction))
             {
                 toggleAutofire();
                 SoundManager.PlayPaperSound();
+            }
+            else if (GameInput.IsPressed(CancelAction))
+            {
+                this.cancelClicked = true;
             }
         }
 
@@ -756,8 +766,17 @@ namespace SpaceScribble
                 if (isActive == false)
                 {
                     this.opacity = OpacityMin;
+                    this.cancelClicked = false;
                     Save();
                 }
+            }
+        }
+
+        public bool CancelClicked
+        {
+            get
+            {
+                return this.cancelClicked;
             }
         }
 

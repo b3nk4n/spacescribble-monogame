@@ -293,7 +293,7 @@ public class SpaceScribble : Game, IBackButtonPressedCallback
 
 
         settingsManager = SettingsManager.GetInstance();
-        settingsManager.Initialize(menuSheet, pericles20, new Rectangle(0, 0, WIDTH, HEIGHT));
+        settingsManager.Initialize(menuSheet, pericles20);
         SettingsManager.GameInput = gameInput;
 
         this.creditsManager = CreditsManager.GetInstance();
@@ -572,7 +572,7 @@ public class SpaceScribble : Game, IBackButtonPressedCallback
                 settingsManager.IsActive = true;
                 settingsManager.Update(gameTime);
 
-                if (backButtonPressed)
+                if (settingsManager.CancelClicked || backButtonPressed)
                 {
                     settingsManager.IsActive = false;
                     gameState = GameStates.MainMenu;
