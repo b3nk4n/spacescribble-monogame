@@ -162,7 +162,7 @@ namespace SpaceScribble
                                               475),
                                   Color.Black * opacity);
 
-            String creditsString = String.Format("{0} $", credits.ToString());
+            String creditsString = credits.ToString() + " $";
 
             spriteBatch.DrawString(FontBig,
                                   creditsString,

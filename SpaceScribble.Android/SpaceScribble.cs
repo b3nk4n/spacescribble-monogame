@@ -502,6 +502,12 @@ public class SpaceScribble : Game, IBackButtonPressedCallback
 
                 EffectManager.Update(gameTime);
 
+                if (!submissionManager.IsActive)
+                {
+                    // we just got into the submission state
+                    creditsManager.Save();
+                }
+
                 submissionManager.IsActive = true;
                 submissionManager.Update(gameTime);
 
