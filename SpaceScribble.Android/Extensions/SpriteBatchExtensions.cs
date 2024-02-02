@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Globalization;
@@ -226,7 +229,7 @@ namespace SpaceScribble.Extensions
         }
 
         public static void DrawStringBordered(this SpriteBatch spriteBatch, SpriteFont font, string text,
-            Vector2 location, Color color, float rotation, Vector2 origin, float scale, Color borderColor)
+            Vector2 location, Color color, Color borderColor, float rotation, Vector2 origin, float scale)
         {
             spriteBatch.DrawString(font,
                                   text,
@@ -331,6 +334,32 @@ namespace SpaceScribble.Extensions
                                   number,
                                   location,
                                   color);
+        }
+
+        public static void DrawBordered(this SpriteBatch spriteBatch, Texture2D texture, Vector2 location,
+            Rectangle source, Color color, Color borderColor)
+        {
+            spriteBatch.Draw(texture,
+                    location + Border1,
+                    source,
+                    borderColor);
+            spriteBatch.Draw(texture,
+                    location + Border2,
+                    source,
+                    borderColor);
+            spriteBatch.Draw(texture,
+                    location + Border3,
+                    source,
+                    borderColor);
+            spriteBatch.Draw(texture,
+                    location + Border4,
+                    source,
+                    borderColor);
+
+            spriteBatch.Draw(texture,
+                    location,
+                    source,
+                    color);
         }
 
         public static void DrawBordered(this SpriteBatch spriteBatch, Texture2D texture, Rectangle destination,
@@ -438,4 +467,3 @@ namespace SpaceScribble.Extensions
         }
     }
 }
-
