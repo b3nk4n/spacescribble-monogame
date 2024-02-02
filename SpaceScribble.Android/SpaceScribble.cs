@@ -10,6 +10,18 @@ namespace SpaceScribble.Android;
 
 public class SpaceScribble : Game
 {
+    /*
+     * The game's fixed width and heigth of the screen.
+     * Do NOT change this number, because other related code uses hard
+     * coded values similar to this one and assumes that this is the screen
+     * dimension. This value values was fixed in Windows Phone,
+     * but there are very different screen out there in Android.
+     */
+    const int WIDTH = 480;
+    const int HEIGHT = 800;
+    Matrix screenScaleMatrix;
+    Vector2 screenScaleVector;
+
     GraphicsDeviceManager graphics;
     SpriteBatch spriteBatch;
 
@@ -102,8 +114,6 @@ public class SpaceScribble : Game
 
     SpaceshipManager spaceshipAndPhonePositionManager;
 
-    private bool bannerLoaded;
-
     HandManager handManager;
 
     public SpaceScribble()
@@ -131,13 +141,26 @@ public class SpaceScribble : Game
     protected override void Initialize()
     {
         graphics.IsFullScreen = true;
-        graphics.PreferredBackBufferHeight = 800;
-        graphics.PreferredBackBufferWidth = 480;
+        graphics.PreferredBackBufferHeight = HEIGHT;
+        graphics.PreferredBackBufferWidth = WIDTH;
         graphics.SupportedOrientations = DisplayOrientation.Portrait;
 
         // Aplly the gfx changes
         graphics.ApplyChanges();
 
+        // calculate scaling matrix/vector to fit everything to the assumed screen bounds
+        var bw = GraphicsDevice.PresentationParameters.BackBufferWidth;
+        var bh = GraphicsDevice.PresentationParameters.BackBufferHeight;
+        screenScaleVector = new Vector2((float)bw / WIDTH, (float)bh / HEIGHT);
+        screenScaleMatrix = Matrix.Identity * Matrix.CreateScale(screenScaleVector.X, screenScaleVector.Y, 0f);
+
+        // Because we are using a different virtual scale compared to the
+        // physical resolution of the screen, using a transformation matrix
+        // of the SpriteBatch, we need to change the display for the touch
+        // panel the same way
+        TouchPanel.DisplayOrientation = DisplayOrientation.Portrait;
+        TouchPanel.DisplayHeight = HEIGHT;
+        TouchPanel.DisplayWidth = WIDTH;
         TouchPanel.EnabledGestures = GestureType.Tap;
 
         loadVersion();
@@ -161,47 +184,41 @@ public class SpaceScribble : Game
         paperSheet = Content.Load<Texture2D>(@"Textures\PaperSheet");
         handSheet = Content.Load<Texture2D>(@"Textures\HandSheet");
 
-        starFieldManager1 = new StarFieldManager(this.GraphicsDevice.Viewport.Width,
-                                                this.GraphicsDevice.Viewport.Height,
-                                                100,
-                                                50,
-                                                new Vector2(0, 25.0f),
-                                                new Vector2(0, 50.0f),
-                                                spriteSheet,
-                                                new Rectangle(0, 550, 2, 2),
-                                                new Rectangle(0, 550, 3, 3),
-                                                planetSheet,
-                                                new Rectangle(0, 0, 400, 314),
-                                                2,
-                                                3);
+        starFieldManager1 = new StarFieldManager(WIDTH,
+                                                 HEIGHT,
+                                                 100,
+                                                 50,
+                                                 new Vector2(0, 25.0f),
+                                                 new Vector2(0, 50.0f),
+                                                 spriteSheet,
+                                                 new Rectangle(0, 550, 2, 2),
+                                                 new Rectangle(0, 550, 3, 3),
+                                                 planetSheet,
+                                                 new Rectangle(0, 0, 400, 314),
+                                                 2,
+                                                 3);
 
         asteroidManager = new AsteroidManager(2,
                                               spriteSheet,
                                               new Rectangle(0, 0, 50, 50),
                                               20,
-                                              this.GraphicsDevice.Viewport.Width,
-                                              this.GraphicsDevice.Viewport.Height);
+                                              WIDTH,
+                                              HEIGHT);
 
         playerManager = new PlayerManager(spriteSheet,
                                           new Rectangle(0, 100, 50, 50),
                                           6,
-                                          new Rectangle(0, 0,
-                                                        this.GraphicsDevice.Viewport.Width,
-                                                        this.GraphicsDevice.Viewport.Height),
+                                          new Rectangle(0, 0, WIDTH,HEIGHT),
                                           playerStartLocation,
                                           gameInput);
 
         enemyManager = new EnemyManager(spriteSheet,
                                         playerManager,
-                                        new Rectangle(0, 0,
-                                                      this.GraphicsDevice.Viewport.Width,
-                                                      this.GraphicsDevice.Viewport.Height));
+                                        new Rectangle(0, 0, WIDTH, HEIGHT));
 
         bossManager = new BossManager(spriteSheet,
                                       playerManager,
-                                      new Rectangle(0, 0,
-                                                    this.GraphicsDevice.Viewport.Width,
-                                                    this.GraphicsDevice.Viewport.Height));
+                                      new Rectangle(0, 0, WIDTH, HEIGHT));
         Boss.Player = playerManager;
 
         EffectManager.Initialize(spriteSheet,
@@ -224,12 +241,12 @@ public class SpaceScribble : Game
         pericles20 = Content.Load<SpriteFont>(@"Fonts\Pericles20");
         pericles32 = Content.Load<SpriteFont>(@"Fonts\Pericles32");
 
-        zoomTextManager = new ZoomTextManager(new Vector2(this.GraphicsDevice.Viewport.Width / 2,
-                                                          this.GraphicsDevice.Viewport.Height / 2),
+        zoomTextManager = new ZoomTextManager(new Vector2(WIDTH / 2,
+                                                          HEIGHT / 2),
                                                           pericles18,
                                                           pericles32);
 
-        hud = Hud.GetInstance(GraphicsDevice.Viewport.Bounds,
+        hud = Hud.GetInstance(new Rectangle(0, 0, WIDTH, HEIGHT),
                               spriteSheet,
                               pericles20,
                               pericles16,
@@ -263,9 +280,7 @@ public class SpaceScribble : Game
 
         instructionManager = new InstructionManager(spriteSheet,
                                                     pericles20,
-                                                    new Rectangle(0, 0,
-                                                                  GraphicsDevice.Viewport.Width,
-                                                                  GraphicsDevice.Viewport.Height),
+                                                    new Rectangle(0, 0, WIDTH, HEIGHT),
                                                     asteroidManager,
                                                     playerManager,
                                                     enemyManager,
@@ -276,9 +291,7 @@ public class SpaceScribble : Game
 
 
         settingsManager = SettingsManager.GetInstance();
-        settingsManager.Initialize(menuSheet, pericles20, new Rectangle(0, 0,
-                                                                        GraphicsDevice.Viewport.Width,
-                                                                        GraphicsDevice.Viewport.Height));
+        settingsManager.Initialize(menuSheet, pericles20, new Rectangle(0, 0, WIDTH, HEIGHT));
         SettingsManager.GameInput = gameInput;
 
         this.creditsManager = CreditsManager.GetInstance();
@@ -296,8 +309,7 @@ public class SpaceScribble : Game
 
     private void setupInputs()
     {
-        gameInput.AddTouchGestureInput(TitleAction, GestureType.Tap, new Rectangle(0, 0,
-                                                                               480, 800));
+        gameInput.AddTouchGestureInput(TitleAction, GestureType.Tap, new Rectangle(0, 0, WIDTH, HEIGHT));
         gameInput.AddTouchGestureInput(BackToGameAction, GestureType.Tap, continueDestination);
         gameInput.AddTouchGestureInput(BackToMainAction, GestureType.Tap, cancelDestination);
         mainMenuManager.SetupInputs();
@@ -342,6 +354,9 @@ public class SpaceScribble : Game
     protected override void Update(GameTime gameTime)
     {
         float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        TouchPanel.DisplayHeight = HEIGHT;
+        TouchPanel.DisplayWidth = WIDTH;
 
         SoundManager.Update(gameTime);
 
@@ -921,7 +936,7 @@ public class SpaceScribble : Game
     {
         GraphicsDevice.Clear(Color.Black);
 
-        spriteBatch.Begin();
+        spriteBatch.Begin(transformMatrix: screenScaleMatrix);
 
         if (gameState == GameStates.TitleScreen)
         {
@@ -932,38 +947,35 @@ public class SpaceScribble : Game
             // title
             spriteBatch.Draw(menuSheet,
                              new Vector2(0.0f, 200.0f),
-                             new Rectangle(0, 0,
-                                           480,
-                                           200),
+                             new Rectangle(0, 0, WIDTH, 200),
                              Color.White);
 
             spriteBatch.DrawString(pericles20,
                                    ContinueText,
-                                   new Vector2(this.GraphicsDevice.Viewport.Width / 2 - pericles20.MeasureString(ContinueText).X / 2,
+                                   new Vector2(WIDTH / 2 - pericles20.MeasureString(ContinueText).X / 2,
                                                455),
                                    Color.Black * (0.25f + (float)(Math.Pow(Math.Sin(gameTime.TotalGameTime.TotalSeconds), 2.0f)) * 0.75f));
 
             spriteBatch.DrawString(pericles20,
                                    MusicByText,
-                                   new Vector2(this.GraphicsDevice.Viewport.Width / 2 - pericles20.MeasureString(MusicByText).X / 2,
+                                   new Vector2(WIDTH / 2 - pericles20.MeasureString(MusicByText).X / 2,
                                                634),
                                    Color.Black);
             spriteBatch.DrawString(pericles20,
                                    MusicCreatorText,
-                                   new Vector2(this.GraphicsDevice.Viewport.Width / 2 - pericles20.MeasureString(MusicCreatorText).X / 2,
+                                   new Vector2(WIDTH / 2 - pericles20.MeasureString(MusicCreatorText).X / 2,
                                                663),
                                    Color.Black);
 
             spriteBatch.DrawString(pericles18,
                                    VersionText,
-                                   new Vector2(this.GraphicsDevice.Viewport.Width - (pericles18.MeasureString(VersionText).X + 15),
-                                               this.GraphicsDevice.Viewport.Height - (pericles18.MeasureString(VersionText).Y + 10)),
+                                   new Vector2(WIDTH - (pericles18.MeasureString(VersionText).X + 15),
+                                               HEIGHT - (pericles18.MeasureString(VersionText).Y + 10)),
                                    Color.Black);
 
             spriteBatch.DrawString(pericles18,
                                    CreatorText,
-                                   new Vector2(15,
-                                               this.GraphicsDevice.Viewport.Height - (pericles18.MeasureString(CreatorText).Y + 10)),
+                                   new Vector2(15, HEIGHT - (pericles18.MeasureString(CreatorText).Y + 10)),
                                    Color.Black);
         }
 
@@ -1114,17 +1126,15 @@ public class SpaceScribble : Game
     private void drawPaper(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(paperSheet,
-                            new Rectangle(0, 0,
-                                        480, 800),
-                            new Rectangle(0, 0,
-                                        480, 800),
+                            new Rectangle(0, 0, WIDTH, HEIGHT),
+                            new Rectangle(0, 0, WIDTH, HEIGHT),
                             Color.White);
 
         // vertical
         for (int x = 15; x < 480; x += 25)
         {
             spriteBatch.Draw(spriteSheet,
-                                new Rectangle(x, 0, 2, 800),
+                                new Rectangle(x, 0, 2, HEIGHT),
                                 new Rectangle(0, 550, 1, 1),
                                 Color.Black * 0.1f);
         }
@@ -1133,7 +1143,7 @@ public class SpaceScribble : Game
         for (int y = 15; y < 800; y += 25)
         {
             spriteBatch.Draw(spriteSheet,
-                                new Rectangle(0, y, 480, 2),
+                                new Rectangle(0, y, WIDTH, 2),
                                 new Rectangle(0, 550, 1, 1),
                                 Color.Black * 0.1f);
         }
