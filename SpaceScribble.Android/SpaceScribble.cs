@@ -118,7 +118,13 @@ public class SpaceScribble : Game, IBackButtonPressedCallback
 
     private bool backButtonPressed = false;
 
-    public SpaceScribble()
+    public delegate void ShowLeaderboards();
+    private readonly ShowLeaderboards showLeaderboards;
+
+    public delegate void SubmitLeaderboardScore(long score);
+    private readonly SubmitLeaderboardScore submitLeaderboardScore;
+
+    public SpaceScribble(ShowLeaderboards showLeaderboards, SubmitLeaderboardScore submitLeaderboardScore)
     {
         graphics = new GraphicsDeviceManager(this);
         graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(graphics_PreparingDeviceSettings);
@@ -127,6 +133,9 @@ public class SpaceScribble : Game, IBackButtonPressedCallback
 
         // Frame rate is 60 fps
         TargetElapsedTime = TimeSpan.FromTicks(166667);
+
+        this.showLeaderboards = showLeaderboards;
+        this.submitLeaderboardScore = submitLeaderboardScore;
     }
 
     void graphics_PreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs e)
@@ -420,7 +429,7 @@ public class SpaceScribble : Game, IBackButtonPressedCallback
                         break;
 
                     case MainMenuManager.MenuItems.Highscores:
-                        // TODO GPGS leaderboards
+                        showLeaderboards();
                         break;
 
                     case MainMenuManager.MenuItems.Instructions:
@@ -506,6 +515,7 @@ public class SpaceScribble : Game, IBackButtonPressedCallback
                 {
                     // we just got into the submission state
                     creditsManager.Save();
+                    submitLeaderboardScore(playerManager.PlayerScore);
                 }
 
                 submissionManager.IsActive = true;
