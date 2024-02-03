@@ -607,43 +607,10 @@ namespace SpaceScribble
         {
             if (PlayerManager.IsSensorInput)
             {
-                // Phones:
                 int phoneIndex = settingsManager.GetNeutralPositionIndex();
-                int rightIndex = phoneIndex + 1;
-                int right2Index = phoneIndex + 2;
-                int leftIndex = phoneIndex - 1;
-                int left2Index = phoneIndex - 2;
 
                 if (phoneIndex >= 0 && phoneIndex < PhoneSource.Length)
                 {
-                    if (leftIndex >= 0 && leftIndex < PhoneSource.Length)
-                        spriteBatch.Draw(
-                            menuTexture,
-                            PhoneLeft1Destination,
-                            PhoneSource[leftIndex],
-                            Color.White * 0.4f);
-
-                    if (left2Index >= 0 && left2Index < PhoneSource.Length)
-                        spriteBatch.Draw(
-                            menuTexture,
-                            PhoneLeft2Destination,
-                            PhoneSource[left2Index],
-                            Color.White * 0.15f);
-
-                    if (rightIndex >= 0 && rightIndex < PhoneSource.Length)
-                        spriteBatch.Draw(
-                            menuTexture,
-                            PhoneRight1Destination,
-                            PhoneSource[rightIndex],
-                            Color.White * 0.4f);
-
-                    if (right2Index >= 0 && right2Index < PhoneSource.Length)
-                        spriteBatch.Draw(
-                            menuTexture,
-                            PhoneRight2Destination,
-                            PhoneSource[right2Index],
-                            Color.White * 0.15f);
-
                     spriteBatch.Draw(
                         menuTexture,
                         PhoneSelectedDestination,
@@ -983,13 +950,13 @@ namespace SpaceScribble
                                           (float)e.AverageAcceleration.Y,
                                           (float)e.AverageAcceleration.Z);
 
-                if (currentAccValue.Z > 0.001f || Math.Abs(currentAccValue.X) > 0.5f)
+                if (currentAccValue.Z < 0.001f || Math.Abs(currentAccValue.X) > 0.5f)
                 {
                     settingsManager.SetNeutralPosition(SettingsManager.NeutralPositionValues.Unsupported);
                     return;
                 }
 
-                float val = -(float)Math.Asin(currentAccValue.Y);
+                float val = (float)Math.Asin(currentAccValue.Y);
 
                 if (val >= settingsManager.GetNeutralPositionRadianValue(-10.0f) && val < settingsManager.GetNeutralPositionRadianValue(5.0f))
                     settingsManager.SetNeutralPosition(SettingsManager.NeutralPositionValues.Angle0);

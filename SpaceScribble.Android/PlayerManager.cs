@@ -204,7 +204,7 @@ namespace SpaceScribble
                                        false);
 
             // update icons
-            for (int i = 0; i < PlayerManager.UPGRADES_COUNT; ++i)
+            for (int i = 0; i < UPGRADES_COUNT; ++i)
             {
                 Rectangle dest;
 
@@ -1094,7 +1094,7 @@ namespace SpaceScribble
             }
         }
 
-        private void HandleTouchInput(TouchCollection touches)
+        private void HandleInput(TouchCollection touches, KeyboardState state)
         {
             if (IsSensorInput)
                 handleSensorControl(touches);
@@ -1288,14 +1288,13 @@ namespace SpaceScribble
             }
 
             // Accelerometer controls
-            Vector3 current = currentAccValue;
-            current.Y = current.Y + (float)Math.Sin(settings.GetNeutralPosition());
+            Vector3 current = Vector3.Transform(currentAccValue, Matrix.CreateRotationX(settings.GetNeutralPosition()));
 
             current.Y = MathHelper.Clamp(current.Y, -0.4f, 0.4f);
             current.X = MathHelper.Clamp(current.X, -0.4f, 0.4f);
 
-            playerSprite.Velocity = new Vector2(current.X * 6,
-                                                -current.Y * 5);
+            playerSprite.Velocity = new Vector2(-current.X * 6,
+                                                current.Y * 5);
 
             if (playerSprite.Velocity.Length() < 0.15f)
             {
@@ -1332,74 +1331,6 @@ namespace SpaceScribble
                 fireTankSpecial();
             else if (shipType == PlayerType.Raider)
                 fireRaiderSpecial();
-        }
-
-        private void HandleKeyboardInput(KeyboardState state)
-        {
-#if DEBUG
-
-            bool fireLaser = false;
-            bool fireSpecial = false;
-            bool upgrade = false;
-
-            // Resolve keys
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1))
-            {
-                fireLaser = true;
-            }
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D2))
-            {
-                fireSpecial = true;
-            }
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D3))
-            {
-                upgrade = true;
-            }
-
-            // Resolve actions
-            if (upgrade)
-            {
-                upgradePlayer();
-            }
-
-            if (fireLaser || fireSpecial)
-                PlayerShotManager.ShotSpeed = initShotSpeed + laserSpeedUpgrades * SHOTSPEED_PER_UPGRADE;
-
-            if (fireLaser)
-            {
-                fireShot();
-            }
-
-            if (fireSpecial)
-            {
-                fireSpecialShot();
-            }
-
-            Vector2 velo = Vector2.Zero;
-
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
-            {
-                velo += new Vector2(-1.0f, 0.0f);
-            }
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
-            {
-                velo += new Vector2(1.0f, 0.0f);
-            }
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Up))
-            {
-                velo += new Vector2(0.0f, -1.0f);
-            }
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
-            {
-                velo += new Vector2(0.0f, 1.0f);
-            }
-
-            if (velo != Vector2.Zero)
-                velo.Normalize();
-
-            playerSprite.Velocity = velo;
-
-#endif
         }
 
         private void adaptMovementLimits()
@@ -1452,8 +1383,7 @@ namespace SpaceScribble
                 if (startUpScale > 1)
                     startUpScale = 1;
 
-                HandleTouchInput(TouchPanel.GetState());
-                HandleKeyboardInput(Keyboard.GetState());
+                HandleInput(TouchPanel.GetState(), Keyboard.GetState());
 
                 if (playerSprite.Velocity.Length() != 0.0f)
                 {
