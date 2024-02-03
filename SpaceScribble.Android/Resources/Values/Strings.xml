@@ -2,6 +2,7 @@
 <resources>
   <string name="app_name">SpaceScribble</string>
   <string name="app_id">509702013473</string>
+  <string name="ad_app_id" translatable="false">ca-app-pub-8102925760359189~7017731657</string>
 </resources>
 
 

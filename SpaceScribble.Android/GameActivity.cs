@@ -8,6 +8,7 @@ using Android.Views;
 using Android.Window;
 using GooglePlay.Services.Helpers;
 using Microsoft.Xna.Framework;
+using SpaceScribble.Android.Ads;
 
 namespace SpaceScribble.Android
 {
@@ -24,16 +25,26 @@ namespace SpaceScribble.Android
     {
         private const string HIGHSCORES_ID = "CgkIoYTu5OoOEAIQAQ";
 
+#if DEBUG
+        private const string AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712";
+#else
+        private const string AD_UNIT_ID = "ca-app-pub-8102925760359189/7701964223";
+#endif
+
         private SpaceScribble _game;
         private View _view;
 
         private GameHelper gameHelper;
+        private AdMobService adMobService;
 
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
 
-            _game = new SpaceScribble(ShowLeaderboardsHandler, SubmitLeaderboardsScore);
+            _game = new SpaceScribble(
+                ShowLeaderboardsHandler, SubmitLeaderboardsScore,
+                StartNewGameHandler, GameOverEndedHandler,
+                IsPrivacyOptionsRequiredHanlder, ShowPrivacyConsentFormHandler);
             _view = _game.Services.GetService(typeof(View)) as View;
 
             if (OperatingSystem.IsAndroidVersionAtLeast(33))
@@ -72,6 +83,9 @@ namespace SpaceScribble.Android
             };
 
             gameHelper.Initialize();
+
+            adMobService = new AdMobService(this);
+            adMobService.Initialize();
         }
 
         private void ShowLeaderboardsHandler()
@@ -88,6 +102,26 @@ namespace SpaceScribble.Android
             {
                 gameHelper.SubmitScore(HIGHSCORES_ID, score);
             }
+        }
+
+        private void StartNewGameHandler()
+        {
+            adMobService.LoadInterstitial(AD_UNIT_ID);
+        }
+
+        private void GameOverEndedHandler()
+        {
+            adMobService.ShowInterstitial();
+        }
+
+        private bool IsPrivacyOptionsRequiredHanlder()
+        {
+            return adMobService.IsPrivacyOptionsRequired;
+        }
+
+        private void ShowPrivacyConsentFormHandler()
+        {
+            adMobService.ShowPrivacyConsentForm();
         }
 
         protected override void OnStart()

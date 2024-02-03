@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 using System.IO.IsolatedStorage;
 using System.IO;
 using SpaceScribble.Inputs;
+using static SpaceScribble.Android.SpaceScribble;
 
 namespace SpaceScribble
 {
@@ -46,6 +47,13 @@ namespace SpaceScribble
         private readonly Rectangle vibrationDestination = new Rectangle(90, 355,
                                                                         300, 50);
 
+        private const string PRIVACY_TITLE = "Privacy: ";
+        private const string PRIVACY_VALUE = "Update";
+        private readonly int privacyPositionY = 430;
+        private bool privacyEnabled = false;
+        private readonly Rectangle privacyDestination = new Rectangle(90, 415,
+                                                                      300, 50);
+
         private NeutralPositionValues neutralPositionValue = NeutralPositionValues.Angle20;
 
         private const string SENSOR_SETTINGS_TITLE = "Sensor control settings: ";
@@ -79,6 +87,7 @@ namespace SpaceScribble
         private const string MusicAction = "MusicSetting";
         private const string SfxAction = "SFXSetting";
         private const string VibrationAction = "VibrationSetting";
+        private const string PrivacyAction = "Privacy";
         private const string ControlPositionAction = "ControlPosSetting";
         private const string AutofireAction = "AutofireSetting";
         private const string CancelAction = "Cancel";
@@ -123,6 +132,9 @@ namespace SpaceScribble
             GameInput.AddTouchGestureInput(VibrationAction,
                                            GestureType.Tap,
                                            vibrationDestination);
+            GameInput.AddTouchGestureInput(PrivacyAction,
+                                           GestureType.Tap,
+                                           privacyDestination);
             GameInput.AddTouchGestureInput(ControlPositionAction,
                                            GestureType.Tap,
                                            controlPositionDestination);
@@ -150,7 +162,7 @@ namespace SpaceScribble
             return settingsManager;
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, bool privacyOptionRequired, ShowPrivacyConsent showPrivacyConsent)
         {
             if (isActive)
             {
@@ -158,7 +170,8 @@ namespace SpaceScribble
                     this.opacity += OpacityChangeRate;
             }
 
-            handleTouchInputs();
+            privacyEnabled = privacyOptionRequired;
+            handleTouchInputs(privacyEnabled, showPrivacyConsent);
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -171,6 +184,11 @@ namespace SpaceScribble
             drawMusic(spriteBatch);
             drawSfx(spriteBatch);
             drawVibration(spriteBatch);
+
+            if (privacyEnabled)
+            {
+                drawPrivacy(spriteBatch);
+            }
 
             // sensor settings title:
             spriteBatch.DrawString(font,
@@ -188,7 +206,7 @@ namespace SpaceScribble
                              Color.White * opacity);
         }
 
-        private void handleTouchInputs()
+        private void handleTouchInputs(bool privacyEnabled, ShowPrivacyConsent showPrivacyConsent)
         {
             if (GameInput.IsPressed(VibrationAction))
             {
@@ -203,6 +221,11 @@ namespace SpaceScribble
             else if (GameInput.IsPressed(SfxAction))
             {
                 toggleSfx();
+                SoundManager.PlayPaperSound();
+            }
+            else if (privacyEnabled && GameInput.IsPressed(PrivacyAction))
+            {
+                showPrivacyConsent();
                 SoundManager.PlayPaperSound();
             }
             else if (GameInput.IsPressed(ControlPositionAction))
@@ -432,6 +455,21 @@ namespace SpaceScribble
                                    text,
                                    new Vector2((ValuePositionX - font.MeasureString(text).X),
                                                vibrationPositionY),
+                                   Color.Black * opacity);
+        }
+
+        private void drawPrivacy(SpriteBatch spriteBatch)
+        {
+            spriteBatch.DrawString(font,
+                                   PRIVACY_TITLE,
+                                   new Vector2(TextPositonX,
+                                               privacyPositionY),
+                                   Color.Black * opacity);
+
+            spriteBatch.DrawString(font,
+                                   PRIVACY_VALUE,
+                                   new Vector2((ValuePositionX - font.MeasureString(PRIVACY_VALUE).X),
+                                               privacyPositionY),
                                    Color.Black * opacity);
         }
 
