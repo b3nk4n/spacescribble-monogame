@@ -1,4 +1,4 @@
-# SpaceScribble using MonoGame ![GitHub](https://img.shields.io/github/license/b3nk4n/scribblehunter-game)
+# SpaceScribble using MonoGame ![GitHub](https://img.shields.io/github/license/b3nk4n/spacescribble-monogame)
 
 A cross-platform port of the [Windows Phone / Windows 8 scribbled space action game](https://github.com/b3nk4n/spacescribble-game) using MonoGame.
 
